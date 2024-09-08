@@ -1,0 +1,58 @@
+[gd_scene load_steps=10 format=3 uid="uid://5wmhr5f46mb3"]
+
+[ext_resource type="Texture2D" uid="uid://3ach8fkynth3" path="res://assets/textures/bg.png" id="1_75id5"]
+[ext_resource type="Script" path="res://scripts/game.gd" id="1_bqy88"]
+[ext_resource type="PackedScene" uid="uid://de38u2lro1qbg" path="res://scenes/player.tscn" id="2_0a83f"]
+[ext_resource type="PackedScene" uid="uid://rblh78ba6ulw" path="res://scenes/hud.tscn" id="2_6r7va"]
+[ext_resource type="Script" path="res://scripts/camera.gd" id="2_gobl7"]
+[ext_resource type="PackedScene" uid="uid://ge3f7p834hfk" path="res://scenes/enemy_spawner.tscn" id="3_7wfu7"]
+[ext_resource type="AudioStream" uid="uid://b4su2yew27gbi" path="res://assets/audio/hit.wav" id="6_lq00r"]
+[ext_resource type="AudioStream" uid="uid://m7pbi2mejtck" path="res://assets/audio/explode.wav" id="7_wqdyx"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ptn4i"]
+size = Vector2(53, 754)
+
+[node name="Game" type="Node2D"]
+script = ExtResource("1_bqy88")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+anchor_mode = 0
+script = ExtResource("2_gobl7")
+
+[node name="Timer" type="Timer" parent="Camera2D"]
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="HUD" parent="UI" instance=ExtResource("2_6r7va")]
+
+[node name="Background" type="TextureRect" parent="."]
+offset_right = 1280.0
+offset_bottom = 720.0
+texture = ExtResource("1_75id5")
+stretch_mode = 1
+
+[node name="Player" parent="." instance=ExtResource("2_0a83f")]
+position = Vector2(38, 379)
+
+[node name="EnemySpawner" parent="." instance=ExtResource("3_7wfu7")]
+
+[node name="Deathzone" type="Area2D" parent="."]
+position = Vector2(-233, 158)
+collision_layer = 8
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Deathzone"]
+position = Vector2(16.5, 199)
+shape = SubResource("RectangleShape2D_ptn4i")
+
+[node name="EnemyHitSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("6_lq00r")
+
+[node name="PlayerTakeDamageSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("7_wqdyx")
+
+[connection signal="timeout" from="Camera2D/Timer" to="Camera2D" method="_on_timer_timeout"]
+[connection signal="took_damage" from="Player" to="." method="_on_player_took_damage"]
+[connection signal="enemy_spawned" from="EnemySpawner" to="." method="_on_enemy_spawner_enemy_spawned"]
+[connection signal="path_enemy_spawned" from="EnemySpawner" to="." method="_on_enemy_spawner_path_enemy_spawned"]
+[connection signal="area_entered" from="Deathzone" to="." method="_on_area_2d_area_entered"]
